@@ -48,6 +48,7 @@
       out += DEVA_MAP[ch] !== undefined ? DEVA_MAP[ch] : ch;
     }
     return out
+      .replace(/x/g, 'ks')
       .replace(/ph/g, 'f')
       .replace(/bh/g, 'b')
       .replace(/dh/g, 'd')
@@ -74,7 +75,12 @@
     return tokens.every((tok) => {
       if (hay.includes(tok)) return true;
       const sk = toPhoneticSkeleton(tok);
-      return sk.length >= 2 && haySkel.includes(sk);
+      if (sk.length >= 2 && haySkel.includes(sk)) return true;
+      if (/[ड़ढ़]/.test(tok)) {
+        const skR = toPhoneticSkeleton(tok.replace(/[ड़ढ़]/g, 'r'));
+        if (skR.length >= 2 && haySkel.includes(skR)) return true;
+      }
+      return false;
     });
   }
 
@@ -228,6 +234,11 @@
       authBtn.classList.remove('unlocked');
       bar.hidden = true;
     }
+
+    ['btn-export-open', 'btn-dl-all-buses-xlsx', 'bd-dl-xlsx', 'btn-dl-busteam-xlsx'].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.hidden = !isAdmin;
+    });
 
     if (hasDraft) {
       syncNote.textContent = '📝 अप्रकाशित बदलाव सहेजे गए — GitHub पर लाइव सेव करें';
@@ -511,13 +522,56 @@
     ].sort((a, z) => Number(a.seat) - Number(z.seat));
 
     const filtered = q
-      ? pax.filter((p) => [p.fullName, p.city, p.mobile, p.seat, ...p.rooms].join(' ').toLowerCase().includes(q))
+      ? pax.filter((p) => smartMatch(q, [p.fullName, p.city, p.mobile, p.seat, ...p.rooms].join(' ')))
       : pax;
 
     const mCnt = pax.filter((x) => isMale(x.gender)).length;
     const fCnt = pax.filter((x) => isFemale(x.gender)).length;
     document.getElementById('bd-title').textContent = `🚌 बस नंबर ${b} — यात्री एवं कमरा सूची`;
     document.getElementById('bd-meta').textContent = `निर्धारित क्षमता: ${cap} सीटें • आवंटित: ${pax.length} (पुरुष: ${mCnt}, स्त्री: ${fCnt}) • रिक्त सीटें: ${busVacant.length}`;
+
+    // Mobile Cards View for Bus Detail
+    const bdCardsEl = document.getElementById('bd-cards-view');
+    if (bdCardsEl) {
+      const paxCardsHtml = filtered.map((p) => {
+        const gCls = isMale(p.gender) ? 'badge-male' : 'badge-female';
+        const gTxt = isMale(p.gender) ? 'पुरुष' : 'स्त्री';
+        const ph = phoneClean(p.mobile);
+        const rmHtml = p.rooms.map((rm, idx) => `
+          <div class="rm-chip ${rm === '-' ? 'empty' : ''}">
+            <span class="rm-lbl">${esc(DH_SHORT[idx])}</span>
+            <span class="rm-val">${esc(rm)}</span>
+          </div>
+        `).join('');
+        return `
+          <article class="p-card" data-pid="${p.id}">
+            <div class="p-top">
+              <div class="p-name"><span class="p-sr">#${esc(p.srNo)}</span>${esc(p.fullName)}</div>
+              <span class="badge-bus">सीट ${esc(p.seat)}</span>
+            </div>
+            <div class="p-badges">
+              <span class="badge-gender ${gCls}">${gTxt} • ${esc(p.age)} वर्ष</span>
+              <span class="badge-city">📍 ${esc(p.city)}</span>
+            </div>
+            <div class="p-meta">
+              <span>${ph ? `<a class="call-link" href="tel:${esc(ph)}" onclick="event.stopPropagation()">📞 ${esc(p.mobile)}</a>` : 'मोबाइल नहीं'}</span>
+            </div>
+            <div class="rooms-mini-grid">${rmHtml}</div>
+          </article>
+        `;
+      }).join('');
+      const vacCardsHtml = !q ? busVacant.map((v) => `
+        <article class="p-card vacant-row" style="cursor:default;">
+          <div class="p-top">
+            <strong>💺 रिक्त सीट ${esc(v.seat)}</strong>
+            <span class="freed-badge">${v.type === 'freed' ? 'रद्द स्लॉट' : 'खाली सीट'}</span>
+          </div>
+          ${v.type === 'freed' ? `<p class="muted" style="font-size:12px;">पूर्व यात्री: ${esc(v.fromName)} (${esc(v.fromGender)})</p>` : ''}
+          ${isAdmin ? `<button class="btn-admin-primary assign-slot-btn" data-slot-id="${esc(v.id)}">➕ इस सीट पर यात्री जोड़ें</button>` : ''}
+        </article>
+      `).join('') : '';
+      bdCardsEl.innerHTML = paxCardsHtml + vacCardsHtml;
+    }
 
     const paxRowsHtml = filtered.map((p) => {
       const gTxt = isMale(p.gender) ? 'पुरुष' : 'स्त्री';
@@ -569,6 +623,16 @@
     }
     const row = e.target.closest('tr[data-pid]');
     if (row) openPassengerModal(Number(row.dataset.pid));
+  });
+  document.getElementById('bd-cards-view').addEventListener('click', (e) => {
+    const assignBtn = e.target.closest('.assign-slot-btn');
+    if (assignBtn) {
+      e.stopPropagation();
+      openEditModal(null, assignBtn.dataset.slotId);
+      return;
+    }
+    const card = e.target.closest('.p-card[data-pid]');
+    if (card) openPassengerModal(Number(card.dataset.pid));
   });
 
   // TAB 3: DHARAMSHALA ROOMS (including Freed Room Slots!)
@@ -1650,6 +1714,10 @@
   }
 
   function handleExport(kind, singleBusNo = null) {
+    if (!isAdmin) {
+      document.getElementById('pin-modal').hidden = false;
+      return;
+    }
     if (kind === 'json') {
       downloadBlob(new Blob([JSON.stringify(DATA, null, 2)], { type: 'application/json' }), 'yatra-data.json');
       return;
@@ -1807,6 +1875,10 @@
   }
 
   document.getElementById('btn-export-open').addEventListener('click', () => {
+    if (!isAdmin) {
+      document.getElementById('pin-modal').hidden = false;
+      return;
+    }
     document.getElementById('export-modal').hidden = false;
   });
   document.querySelectorAll('.export-card-btn').forEach((btn) => {

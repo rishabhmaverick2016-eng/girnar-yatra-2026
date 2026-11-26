@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=3" />
   <!-- SheetJS for real .xlsx Excel downloads directly in browser -->
   <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 </head>
@@ -28,7 +28,7 @@
       </div>
       <div class="header-actions">
         <span class="date-pill">📅 13–17 दिसम्बर 2026</span>
-        <button class="btn-outline" id="btn-export-open" title="Excel डाउनलोड करें">📥 Excel</button>
+        <button class="btn-outline" id="btn-export-open" title="Excel डाउनलोड करें" hidden>📥 Excel</button>
         <button class="btn-outline" id="btn-print" title="वर्तमान दृश्य प्रिंट करें">🖨️ प्रिंट</button>
         <button class="btn-outline btn-admin-toggle" id="btn-admin-auth" title="समिति एडमिन लॉगिन">🔒 Admin</button>
       </div>
@@ -134,7 +134,7 @@
           <h2>🚌 बस एवं सीट आवंटन विवरण (Bus 1 – Bus 9)</h2>
           <p class="muted">किसी भी बस कार्ड पर क्लिक करके यात्री सूची, खाली सीटें व रद्द स्लॉट देखें।</p>
         </div>
-        <button class="btn-secondary" id="btn-dl-all-buses-xlsx">📥 सभी 9 बसों की Excel डाउनलोड</button>
+        <button class="btn-secondary" id="btn-dl-all-buses-xlsx" hidden>📥 सभी 9 बसों की Excel डाउनलोड</button>
       </div>
       <div id="bus-cards-grid" class="bus-summary-grid"></div>
       <div id="bus-detail-panel" class="card bus-detail-box" hidden>
@@ -145,11 +145,12 @@
           </div>
           <div class="bd-actions">
             <input type="search" id="bd-search" class="mini-search" placeholder="इस बस में खोजें..." />
-            <button class="btn-secondary" id="bd-dl-xlsx" style="background:#15803d;">📥 यह बस Excel</button>
+            <button class="btn-secondary" id="bd-dl-xlsx" style="background:#15803d;" hidden>📥 यह बस Excel</button>
             <button class="btn-secondary" id="bd-close">← सभी बसें</button>
           </div>
         </div>
-        <div class="table-wrap">
+        <div id="bd-cards-view" class="passenger-grid bd-mobile-only"></div>
+        <div id="bd-table-wrap" class="table-wrap bd-desktop-only">
           <table class="data-table">
             <thead>
               <tr>
@@ -266,7 +267,7 @@
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <button class="btn-admin-primary" id="btn-add-busteam-global" hidden>➕ बस टीम सदस्य जोड़ें</button>
-          <button class="btn-secondary" id="btn-dl-busteam-xlsx" style="background:#15803d;">📥 बस टीम Excel</button>
+          <button class="btn-secondary" id="btn-dl-busteam-xlsx" style="background:#15803d;" hidden>📥 बस टीम Excel</button>
         </div>
       </div>
       <div id="busteam-grid" class="committees-grid"></div>
@@ -660,7 +661,7 @@
   </footer>
 
   <!-- Data Script (fallback for offline/file://) + App Logic -->
-  <script src="data.js"></script>
-  <script src="app.js"></script>
+  <script src="data.js?v=3"></script>
+  <script src="app.js?v=3"></script>
 </body>
 </html>

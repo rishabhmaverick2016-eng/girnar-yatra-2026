@@ -1197,3 +1197,177 @@ select {
 .pick-item:last-child {
   border-bottom: none;
 }
+
+
+/* =========================================================
+   MOBILE-FIRST POLISH (Phones <= 640px)
+   ========================================================= */
+@media (max-width: 640px) {
+  .app-header {
+    padding: 12px 12px 10px;
+  }
+  .brand-flag {
+    width: 42px;
+    height: 42px;
+    font-size: 24px;
+    border-radius: 10px;
+  }
+  .app-header h1 {
+    font-size: 1.02rem;
+    line-height: 1.25;
+  }
+  .subtitle {
+    font-size: 0.76rem;
+  }
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
+    gap: 6px;
+  }
+  .date-pill {
+    font-size: 0.74rem;
+    padding: 5px 9px;
+  }
+  .btn-outline {
+    padding: 7px 10px;
+    font-size: 0.78rem;
+    flex: 1;
+    text-align: center;
+  }
+  .kpi-strip {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .kpi-card {
+    padding: 7px 10px;
+  }
+  .kpi-val {
+    font-size: 1.1rem;
+  }
+
+  /* Admin Bar mobile layout */
+  .admin-bar {
+    padding: 8px 10px;
+  }
+  .admin-btns {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    width: 100%;
+    gap: 6px;
+  }
+  .admin-btns button {
+    padding: 9px 8px;
+    font-size: 0.78rem;
+    text-align: center;
+  }
+
+  /* Larger touch targets for Tabs */
+  .nav-scroll {
+    padding: 6px 8px;
+    gap: 6px;
+  }
+  .nav-tab {
+    padding: 9px 12px;
+    font-size: 0.84rem;
+    min-height: 40px;
+  }
+  .dual-tabs {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .sub-tab {
+    flex: 1 1 auto;
+    padding: 9px 10px;
+    font-size: 0.8rem;
+    text-align: center;
+  }
+
+  /* Zero horizontal overflow on all card grids */
+  .container {
+    padding: 0 10px;
+    margin: 12px auto 32px;
+  }
+  .passenger-grid,
+  .bus-summary-grid,
+  .rooms-grid,
+  .contacts-grid,
+  .committees-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px;
+  }
+
+  /* Prevent iOS Safari / Mobile zoom on input focus */
+  input, select, textarea,
+  .search-box input,
+  .form-stack input,
+  .form-stack select,
+  .mini-search {
+    font-size: 16px !important;
+    min-height: 42px;
+  }
+
+  .filters-row {
+    gap: 8px;
+  }
+  select {
+    flex: 1 1 100%;
+  }
+  .view-toggle {
+    width: 100%;
+  }
+  .vt-btn {
+    flex: 1;
+    padding: 9px 10px;
+  }
+
+  /* Larger Call & Action Buttons for Thumb Tap */
+  .call-link {
+    padding: 6px 12px;
+    font-size: 0.82rem;
+    min-height: 34px;
+  }
+  .comm-find-btn {
+    padding: 7px 10px;
+    font-size: 0.78rem;
+    min-height: 34px;
+  }
+
+  /* Smooth touch table scrolling */
+  .table-wrap {
+    -webkit-overflow-scrolling: touch;
+  }
+  .data-table th, .data-table td {
+    padding: 7px 8px;
+    font-size: 0.79rem;
+  }
+
+  /* Bottom-sheet style crisp Modals */
+  .modal {
+    padding: 8px;
+    align-items: flex-end;
+  }
+  .modal-content {
+    max-height: 92vh;
+    border-radius: 16px;
+    padding: 14px;
+  }
+  .modal-close {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .form-grid-2, .form-grid-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* Responsive Bus Detail Cards vs Table */
+.bd-mobile-only { display: none; }
+.bd-desktop-only { display: block; }
+@media (max-width: 640px) {
+  .bd-mobile-only { display: grid; }
+  .bd-desktop-only { display: none; }
+}
