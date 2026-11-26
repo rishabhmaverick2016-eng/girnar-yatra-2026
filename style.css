@@ -1371,3 +1371,116 @@ select {
   .bd-mobile-only { display: grid; }
   .bd-desktop-only { display: none; }
 }
+
+
+/* =========================================================
+   SELLERBRO.IN MARKETING BANNER
+   ========================================================= */
+.sellerbro-wrap {
+  margin-top: 8px;
+  margin-bottom: 12px;
+}
+.sellerbro-banner {
+  background: linear-gradient(135deg, #F4EEE3 0%, #FFFDF8 100%);
+  border: 1.5px solid #C9A578;
+  border-left: 5px solid #E26F14;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: var(--shadow);
+  color: #1D1B3A;
+}
+.sb-top {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.sb-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sb-logo {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sb-eyebrow {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #E26F14;
+}
+.sb-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #1D1B3A;
+  line-height: 1.25;
+}
+.sb-offer {
+  background: #1D1B3A;
+  color: #FFFDF8;
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.sb-desc {
+  font-size: 0.85rem;
+  color: #5E5A72;
+  margin-bottom: 12px;
+  line-height: 1.45;
+}
+.sb-desc strong {
+  color: #1D1B3A;
+}
+.sb-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.sb-btn-site, .sb-btn-wa {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 0.12s, filter 0.12s;
+}
+.sb-btn-site {
+  background: #E26F14;
+  color: #fff;
+}
+.sb-btn-wa {
+  background: #1FA463;
+  color: #fff;
+}
+.sb-btn-site:hover, .sb-btn-wa:hover {
+  filter: brightness(0.95);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 640px) {
+  .sellerbro-banner {
+    padding: 13px;
+  }
+  .sb-actions {
+    flex-direction: column;
+  }
+  .sb-btn-site, .sb-btn-wa {
+    width: 100%;
+    min-height: 40px;
+  }
+}
+
+@media print {
+  .sellerbro-wrap { display: none !important; }
+}
