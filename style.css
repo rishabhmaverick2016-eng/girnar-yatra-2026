@@ -1164,3 +1164,36 @@ select {
   color: var(--muted);
   font-size: 0.78rem;
 }
+
+
+/* Autocomplete Yatri Picker inside Samiti & Bus Team Modals */
+.pick-results {
+  margin-top: 6px;
+  max-height: 175px;
+  overflow-y: auto;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+.pick-item {
+  width: 100%;
+  text-align: left;
+  border: none;
+  border-bottom: 1px solid #f3f4f6;
+  background: #fff;
+  padding: 7px 10px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.82rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.pick-item:hover {
+  background: var(--saffron-soft);
+}
+.pick-item:last-child {
+  border-bottom: none;
+}

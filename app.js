@@ -32,6 +32,95 @@
     return String(m).split(/[\\/,]/)[0].replace(/[^\d+]/g, '');
   };
 
+  // Hindi (Devanagari) <-> English Phonetic Search Helper
+  const DEVA_MAP = {
+    'अ':'a','आ':'a','इ':'i','ई':'i','उ':'u','ऊ':'u','ए':'e','ऐ':'ai','ओ':'o','औ':'au','ऋ':'ri',
+    'ा':'a','ि':'i','ी':'i','ु':'u','ू':'u','े':'e','ै':'ai','ो':'o','ौ':'au','ं':'n','ँ':'n','ः':'h','्':'',
+    'क':'k','ख':'kh','ग':'g','घ':'gh','ङ':'n','च':'c','छ':'c','ज':'j','झ':'jh','ञ':'n',
+    'ट':'t','ठ':'t','ड':'d','ढ':'d','ण':'n','त':'t','थ':'t','द':'d','ध':'d','न':'n',
+    'प':'p','फ':'f','ब':'b','भ':'b','म':'m','य':'y','र':'r','ल':'l','व':'v',
+    'श':'s','ष':'s','स':'s','ह':'h','ळ':'l','ड़':'d','ढ़':'d','क़':'k','ख़':'k','ग़':'g','ज़':'z','फ़':'f'
+  };
+
+  function toPhoneticSkeleton(str) {
+    let out = '';
+    for (const ch of String(str || '').toLowerCase()) {
+      out += DEVA_MAP[ch] !== undefined ? DEVA_MAP[ch] : ch;
+    }
+    return out
+      .replace(/ph/g, 'f')
+      .replace(/bh/g, 'b')
+      .replace(/dh/g, 'd')
+      .replace(/th/g, 't')
+      .replace(/kh/g, 'k')
+      .replace(/gh/g, 'g')
+      .replace(/jh/g, 'j')
+      .replace(/sh/g, 's')
+      .replace(/chh?/g, 'c')
+      .replace(/ostw/g, 'osw')
+      .replace(/w/g, 'v')
+      .replace(/z/g, 'j')
+      .replace(/[aeiouhy\u200c\u200d]/g, '')
+      .replace(/(.)\1+/g, '$1');
+  }
+
+  function smartMatch(query, hayText) {
+    const q = String(query || '').trim().toLowerCase();
+    if (!q) return true;
+    const hay = String(hayText || '').toLowerCase();
+    if (hay.includes(q)) return true;
+    const tokens = q.split(/\s+/).filter(Boolean);
+    const haySkel = toPhoneticSkeleton(hay);
+    return tokens.every((tok) => {
+      if (hay.includes(tok)) return true;
+      const sk = toPhoneticSkeleton(tok);
+      return sk.length >= 2 && haySkel.includes(sk);
+    });
+  }
+
+  function bindYatriPicker(inputId, listId, onPick) {
+    const inp = document.getElementById(inputId);
+    const listEl = document.getElementById(listId);
+    if (!inp || !listEl) return;
+
+    inp.addEventListener('input', () => {
+      const q = inp.value.trim();
+      if (!q) {
+        listEl.hidden = true;
+        listEl.innerHTML = '';
+        return;
+      }
+      const matches = DATA.passengers.filter((p) =>
+        smartMatch(q, `${p.fullName} ${p.mobile} ${p.city} bus ${p.bus}`)
+      ).slice(0, 12);
+
+      if (!matches.length) {
+        listEl.innerHTML = '<div class="muted" style="padding:8px 10px;font-size:12px;">कोई यात्री नहीं मिला — नीचे सीधे नाम लिखें।</div>';
+        listEl.hidden = false;
+        return;
+      }
+      listEl.innerHTML = matches.map((p) => `
+        <button type="button" class="pick-item" data-pid="${p.id}">
+          <span><strong>${esc(p.fullName)}</strong> <span class="muted">(${esc(p.city)} • B${esc(p.bus)}/S${esc(p.seat)})</span></span>
+          <span style="color:var(--green-fg);font-weight:700;">${esc(p.mobile || '')}</span>
+        </button>
+      `).join('');
+      listEl.hidden = false;
+    });
+
+    listEl.addEventListener('click', (e) => {
+      const btn = e.target.closest('.pick-item');
+      if (!btn) return;
+      const p = DATA.passengers.find((x) => x.id === Number(btn.dataset.pid));
+      if (p) {
+        onPick(p);
+        inp.value = '';
+        listEl.hidden = true;
+        listEl.innerHTML = '';
+      }
+    });
+  }
+
   // App State
   let isAdmin = sessionStorage.getItem(AUTH_KEY) === '1';
   let hasDraft = false;
@@ -253,8 +342,8 @@
         const hay = [
           p.fullName, p.mobile, p.city, p.state, p.headOfFamily,
           `bus ${p.bus}`, `seat ${p.seat}`, p.srNo, ...p.rooms
-        ].join(' ').toLowerCase();
-        if (!hay.includes(q)) return false;
+        ].join(' ');
+        if (!smartMatch(q, hay)) return false;
       }
       return true;
     });
@@ -764,8 +853,17 @@
       document.getElementById('samiti-form').reset();
       sel.value = String(cIdx);
     }
+    document.getElementById('sf-yatri-pick-search').value = '';
+    document.getElementById('sf-yatri-pick-list').hidden = true;
     document.getElementById('samiti-modal').hidden = false;
   }
+
+  bindYatriPicker('sf-yatri-pick-search', 'sf-yatri-pick-list', (p) => {
+    document.getElementById('sf-name').value = p.fullName;
+    document.getElementById('sf-city').value = p.city || '';
+    document.getElementById('sf-mobile').value = p.mobile || '';
+    document.getElementById('sf-search').value = p.fullName;
+  });
 
   document.getElementById('btn-add-samiti-member').addEventListener('click', () => openSamitiModal(0, null));
   document.getElementById('btn-add-samiti-group').addEventListener('click', () => {
@@ -905,8 +1003,17 @@
       document.getElementById('busteam-form').reset();
       document.getElementById('bf-bus').value = String(busNo);
     }
+    document.getElementById('bf-yatri-pick-search').value = '';
+    document.getElementById('bf-yatri-pick-list').hidden = true;
     document.getElementById('busteam-modal').hidden = false;
   }
+
+  bindYatriPicker('bf-yatri-pick-search', 'bf-yatri-pick-list', (p) => {
+    document.getElementById('bf-name').value = p.fullName;
+    document.getElementById('bf-city').value = p.city || '';
+    document.getElementById('bf-mobile').value = p.mobile || '';
+    if (p.bus) document.getElementById('bf-bus').value = String(p.bus);
+  });
 
   document.getElementById('btn-add-busteam-global').addEventListener('click', () => openBusTeamModal(1, null));
   document.getElementById('btn-dl-busteam-xlsx').addEventListener('click', () => handleExport('busteam'));

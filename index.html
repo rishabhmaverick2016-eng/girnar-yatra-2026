@@ -520,6 +520,11 @@
       <form id="samiti-form" class="form-stack">
         <input type="hidden" id="sf-comm-idx" />
         <input type="hidden" id="sf-mem-idx" />
+        <div class="slot-picker-box">
+          <label class="form-lbl">🔍 यात्री सूची में से खोजें (Hindi / English / मोबाइल — स्वचालित भरने हेतु):</label>
+          <input type="search" id="sf-yatri-pick-search" placeholder="नाम या मोबाइल लिखें (जैसे: Shantilal / शांतिलाल / 9480)..." autocomplete="off" />
+          <div id="sf-yatri-pick-list" class="pick-results" hidden></div>
+        </div>
         <div>
           <label class="form-lbl">समिति चुनें *</label>
           <select id="sf-comm-select" required></select>
@@ -564,6 +569,11 @@
       <form id="busteam-form" class="form-stack">
         <input type="hidden" id="bf-orig-bus" />
         <input type="hidden" id="bf-mem-idx" />
+        <div class="slot-picker-box">
+          <label class="form-lbl">🔍 यात्री सूची में से खोजें (Hindi / English / मोबाइल — स्वचालित भरने हेतु):</label>
+          <input type="search" id="bf-yatri-pick-search" placeholder="नाम या मोबाइल लिखें (जैसे: Suresh / सुरेश / 9825)..." autocomplete="off" />
+          <div id="bf-yatri-pick-list" class="pick-results" hidden></div>
+        </div>
         <div class="form-grid-2">
           <div>
             <label class="form-lbl">बस नंबर *</label>
