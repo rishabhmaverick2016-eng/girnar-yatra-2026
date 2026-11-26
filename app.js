@@ -32,6 +32,81 @@
     return String(m).split(/[\\/,]/)[0].replace(/[^\d+]/g, '');
   };
 
+  function waNumber(m) {
+    const digits = phoneClean(m).replace(/\D/g, '');
+    if (digits.length === 10) return `91${digits}`;
+    if (digits.length === 12 && digits.startsWith('91')) return digits;
+    if (digits.length > 10) return `91${digits.slice(-10)}`;
+    return '';
+  }
+
+  function buildSingleWaMessage(p) {
+    const rmLabels = [
+      '13/12/26 (मांडोली - शांति पुरम)',
+      '14/12/26 (संकेश्वर - पारस पद्मावती)',
+      '14/12/26 (संकेश्वर - राजेंद्र सूरी)',
+      '15-16/12/26 (गिरनार दर्शन)',
+      '17/12/26 (भीलड़ी - श्री संघवी)',
+      '17/12/26 (भीलड़ी - भूरी बाई)'
+    ];
+    const roomLines = p.rooms
+      .map((rm, idx) => (rm && rm !== '-' ? `• ${rmLabels[idx]}: *कमरा ${rm}*` : ''))
+      .filter(Boolean);
+
+    return [
+      '🚩 *समदड़ी से श्री गिरनारजी तीर्थ यात्रा संघ – 2026*',
+      'आयोजक: श्री समदड़ी जैन मित्र मंडल, समदड़ी',
+      '',
+      '🙏 *जय जिनेंद्र,*',
+      `*यात्री का नाम:* ${p.fullName} (Sr #${p.srNo})`,
+      `*शहर:* ${p.city || '-'}`,
+      '',
+      '🚌 *बस एवं सीट विवरण:*',
+      `• बस नंबर: *Bus ${p.bus}*`,
+      `• सीट नंबर: *Seat ${p.seat}*`,
+      '',
+      '🏨 *धर्मशाला एवं कमरा आवंटन:*',
+      ...(roomLines.length ? roomLines : ['• कमरा आवंटन शेष']),
+      '',
+      '🙏 सुखद एवं मंगलमय तीर्थ यात्रा की शुभकामनाएं!'
+    ].join('\n');
+  }
+
+  function buildFamilyWaMessage(p, famMembers) {
+    const shortLabels = ['मांडोली', 'संके. पारस', 'संके. राजेंद्र', 'गिरनार', 'भीलड़ी संघवी', 'भीलड़ी भूरीबाई'];
+    const lines = [
+      '🚩 *समदड़ी से श्री गिरनारजी तीर्थ यात्रा संघ – 2026*',
+      'आयोजक: श्री समदड़ी जैन मित्र मंडल, समदड़ी',
+      '',
+      '🙏 *जय जिनेंद्र,*',
+      `*परिवार विवरण (मुखिया: ${p.headOfFamily || p.fullName} | ${p.city || '-'})*`,
+      ''
+    ];
+    famMembers.forEach((fm, idx) => {
+      const gTxt = isMale(fm.gender) ? 'पुरुष' : 'स्त्री';
+      const rms = fm.rooms
+        .map((rm, rIdx) => (rm && rm !== '-' ? `${shortLabels[rIdx]}: *${rm}*` : ''))
+        .filter(Boolean)
+        .join(' | ');
+      lines.push(`*${idx + 1}. ${fm.fullName}* (${fm.age} वर्ष, ${gTxt})`);
+      lines.push(`🚌 बस: *${fm.bus}* | सीट: *${fm.seat}*`);
+      lines.push(`🏨 ${rms || 'कमरा आवंटन शेष'}`);
+      lines.push('');
+    });
+    lines.push('🙏 सुखद एवं मंगलमय तीर्थ यात्रा की शुभकामनाएं!');
+    return lines.join('\n');
+  }
+
+  function renderCardWaBtn(p) {
+    const wa = waNumber(p.mobile);
+    if (!wa) return '';
+    if (isAdmin) {
+      const url = `https://wa.me/${wa}?text=${encodeURIComponent(buildSingleWaMessage(p))}`;
+      return `<a class="call-link" style="background:#dcfce7;color:#166534;" href="${url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">💬 विवरण भेजें</a>`;
+    }
+    return `<a class="call-link" style="background:#dcfce7;color:#166534;" href="https://wa.me/${wa}" target="_blank" rel="noopener" onclick="event.stopPropagation()">💬</a>`;
+  }
+
   // Hindi (Devanagari) <-> English Phonetic Search Helper
   const DEVA_MAP = {
     'अ':'a','आ':'a','इ':'i','ई':'i','उ':'u','ऊ':'u','ए':'e','ऐ':'ai','ओ':'o','औ':'au','ऋ':'ri',
@@ -406,7 +481,10 @@
             </div>
             <div class="p-meta">
               <span>मुखिया: <strong>${esc(p.headOfFamily || '-')}</strong></span>
-              ${ph ? `<a class="call-link" href="tel:${esc(ph)}" onclick="event.stopPropagation()">📞 ${esc(p.mobile)}</a>` : '<span class="muted">मोबाइल नहीं</span>'}
+              <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap;">
+                ${ph ? `<a class="call-link" href="tel:${esc(ph)}" onclick="event.stopPropagation()">📞 ${esc(p.mobile)}</a>` : '<span class="muted">मोबाइल नहीं</span>'}
+                ${renderCardWaBtn(p)}
+              </div>
             </div>
             <div class="rooms-mini-grid">${rmHtml}</div>
           </article>
@@ -554,7 +632,10 @@
               <span class="badge-city">📍 ${esc(p.city)}</span>
             </div>
             <div class="p-meta">
-              <span>${ph ? `<a class="call-link" href="tel:${esc(ph)}" onclick="event.stopPropagation()">📞 ${esc(p.mobile)}</a>` : 'मोबाइल नहीं'}</span>
+              <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap;">
+                ${ph ? `<a class="call-link" href="tel:${esc(ph)}" onclick="event.stopPropagation()">📞 ${esc(p.mobile)}</a>` : 'मोबाइल नहीं'}
+                ${renderCardWaBtn(p)}
+              </div>
             </div>
             <div class="rooms-mini-grid">${rmHtml}</div>
           </article>
@@ -1246,7 +1327,15 @@
     if (!p) return;
 
     const ph = phoneClean(p.mobile);
+    const wa = waNumber(p.mobile);
     const famMembers = DATA.passengers.filter((x) => x.familyId === p.familyId);
+
+    const waModalBtns = !wa ? '' : isAdmin
+      ? `
+        <a class="call-link" style="background:#dcfce7;color:#166534;font-size:0.86rem;padding:5px 12px;" href="https://wa.me/${esc(wa)}?text=${encodeURIComponent(buildSingleWaMessage(p))}" target="_blank" rel="noopener">💬 यात्री विवरण भेजें</a>
+        <a class="call-link" style="background:#15803d;color:#fff;font-size:0.86rem;padding:5px 12px;" href="https://wa.me/${esc(wa)}?text=${encodeURIComponent(buildFamilyWaMessage(p, famMembers))}" target="_blank" rel="noopener">👨‍👩‍👧‍👦 परिवार विवरण भेजें</a>
+      `
+      : `<a class="call-link" style="background:#dcfce7;color:#166534;font-size:0.88rem;padding:5px 12px;" href="https://wa.me/${esc(wa)}" target="_blank" rel="noopener">💬 WhatsApp</a>`;
 
     document.getElementById('m-name').textContent = p.fullName;
     document.getElementById('m-sub').textContent = `Sr #${p.srNo} • ${p.gender} • ${p.age} वर्ष • ${p.city}, ${p.state}`;
@@ -1256,7 +1345,7 @@
         <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
           <span class="badge-bus" style="font-size:0.9rem;padding:5px 12px;">🚌 बस नंबर ${esc(p.bus)} • सीट नंबर ${esc(p.seat)}</span>
           ${ph ? `<a class="call-link" style="font-size:0.88rem;padding:5px 12px;" href="tel:${esc(ph)}">📞 कॉल: ${esc(p.mobile)}</a>` : ''}
-          ${ph && ph.length === 10 ? `<a class="call-link" style="background:#dcfce7;color:#166534;font-size:0.88rem;padding:5px 12px;" href="https://wa.me/91${esc(ph)}" target="_blank" rel="noopener">💬 WhatsApp</a>` : ''}
+          ${waModalBtns}
         </div>
         ${isAdmin ? `
           <div style="display:flex;gap:6px;">
