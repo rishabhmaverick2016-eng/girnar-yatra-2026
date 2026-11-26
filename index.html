@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <meta name="theme-color" content="#7c1d1d" />
+  <meta name="description" content="समदड़ी से श्री गिरनारजी तीर्थ यात्रा संघ 2026 - समिति प्रबंधन पोर्टल (यात्री, बस, धर्मशाला कमरा, रूट एवं लाइव एडिट)" />
+  <title>समदड़ी से श्री गिरनारजी तीर्थ यात्रा संघ – 2026 | समिति पोर्टल</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%237c1d1d'/%3E%3Ctext x='50%25' y='54%25' font-size='36' text-anchor='middle' dominant-baseline='middle'%3E🚩%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <!-- SheetJS for real .xlsx Excel downloads directly in browser -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+  <!-- Top App Header -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand-block">
+        <div class="brand-flag" aria-hidden="true">🚩</div>
+        <div>
+          <h1 id="app-title">समदड़ी से श्री गिरनारजी तीर्थ यात्रा संघ – 2026</h1>
+          <p class="subtitle" id="app-subtitle">आयोजक: श्री समदड़ी जैन मित्र मंडल, समदड़ी • समिति प्रबंधन पोर्टल</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <span class="date-pill">📅 13–17 दिसम्बर 2026</span>
+        <button class="btn-outline" id="btn-export-open" title="Excel डाउनलोड करें">📥 Excel</button>
+        <button class="btn-outline" id="btn-print" title="वर्तमान दृश्य प्रिंट करें">🖨️ प्रिंट</button>
+        <button class="btn-outline btn-admin-toggle" id="btn-admin-auth" title="समिति एडमिन लॉगिन">🔒 Admin</button>
+      </div>
+    </div>
+
+    <!-- Live KPI Strip -->
+    <div class="kpi-strip" id="kpi-strip"></div>
+  </header>
+
+  <!-- Admin Action Bar (Visible only after PIN 8049 unlock) -->
+  <div class="admin-bar" id="admin-bar" hidden>
+    <div class="admin-bar-inner">
+      <div class="admin-status">
+        <span class="admin-pill">🔓 Admin मोड सक्रिय</span>
+        <span id="sync-status-text" class="sync-note">कोई अप्रकाशित बदलाव नहीं</span>
+      </div>
+      <div class="admin-btns">
+        <button class="btn-admin-primary" id="btn-add-member">➕ अंतिम/नया यात्री जोड़ें</button>
+        <button class="btn-admin-light" id="btn-view-vacant">💺 रिक्त सीट व कमरे (<span id="vacant-cnt-pill">0</span>)</button>
+        <button class="btn-admin-publish" id="btn-publish-github">☁️ GitHub पर लाइव सेव</button>
+        <button class="btn-admin-light" id="btn-gh-settings">⚙️ GitHub सेटिंग्स</button>
+        <button class="btn-admin-danger" id="btn-discard-draft" hidden>↩️ रीसेट</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sticky Navigation Tabs -->
+  <nav class="main-nav" aria-label="मुख्य नेविगेशन">
+    <div class="nav-scroll">
+      <button class="nav-tab active" data-tab="passengers">🔍 यात्री सूची <span class="badge" id="nav-cnt-passengers">390</span></button>
+      <button class="nav-tab" data-tab="buses">🚌 बस अनुसार <span class="badge">9</span></button>
+      <button class="nav-tab" data-tab="rooms">🏨 धर्मशाला कमरे <span class="badge">6</span></button>
+      <button class="nav-tab" data-tab="route">🛣️ यात्रा मार्ग व दूरी <span class="badge">10</span></button>
+      <button class="nav-tab" data-tab="contacts">📞 तीर्थ संपर्क <span class="badge">9</span></button>
+      <button class="nav-tab" data-tab="committees">👥 समितियां <span class="badge" id="nav-cnt-comm">5</span></button>
+      <button class="nav-tab" data-tab="busteam">🛡️ बस प्रबंधन टीम <span class="badge" id="nav-cnt-busteam">9</span></button>
+      <button class="nav-tab" data-tab="cities">🏙️ शहर, रिक्त व रद्द <span class="badge" id="nav-cnt-cancelled">18</span></button>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="container">
+
+    <!-- TAB 1: PASSENGERS -->
+    <section id="tab-passengers" class="tab-panel active">
+      <div class="toolbar card">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="search" id="p-search" placeholder="नाम, पिता/पति का नाम, गोत्र, मोबाइल, शहर, बस या कमरा नं. खोजें..." autocomplete="off" />
+          <button class="clear-btn" id="p-clear" title="साफ़ करें" hidden>✕</button>
+        </div>
+        <div class="filters-row">
+          <select id="p-bus-filter" aria-label="बस फ़िल्टर">
+            <option value="">सभी बसें (All Buses)</option>
+          </select>
+          <select id="p-city-filter" aria-label="शहर फ़िल्टर">
+            <option value="">सभी शहर (All Cities)</option>
+          </select>
+          <select id="p-gender-filter" aria-label="लिंग फ़िल्टर">
+            <option value="">सभी (Male & Female)</option>
+            <option value="male">पुरुष (Male)</option>
+            <option value="female">स्त्री (Female)</option>
+          </select>
+          <div class="view-toggle" role="group" aria-label="View mode">
+            <button class="vt-btn active" data-view="cards" title="कार्ड व्यू">🗂️ कार्ड</button>
+            <button class="vt-btn" data-view="table" title="तालिका व्यू">📋 टेबल</button>
+          </div>
+        </div>
+        <div class="result-meta">
+          <span id="p-count-label">कुल 390 यात्री प्रदर्शित</span>
+          <button class="link-btn" id="p-reset-filters" hidden>सभी फ़िल्टर हटाएं</button>
+        </div>
+      </div>
+
+      <div id="p-results-cards" class="passenger-grid"></div>
+      <div id="p-results-table" class="table-wrap card" hidden>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Sr</th>
+              <th>यात्री का नाम व परिवार</th>
+              <th>उम्र/लिंग</th>
+              <th>शहर</th>
+              <th>मोबाइल</th>
+              <th>बस / सीट</th>
+              <th>मांडोली (13/12)</th>
+              <th>संकेश्वर पारस (14/12)</th>
+              <th>संकेश्वर राजेंद्र (14/12)</th>
+              <th>गिरनार (15-16)</th>
+              <th>भीलड़ी संघवी (17)</th>
+              <th>भीलड़ी भूरीबाई (17)</th>
+            </tr>
+          </thead>
+          <tbody id="p-table-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TAB 2: BUSES -->
+    <section id="tab-buses" class="tab-panel">
+      <div class="section-header" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;align-items:center;">
+        <div>
+          <h2>🚌 बस एवं सीट आवंटन विवरण (Bus 1 – Bus 9)</h2>
+          <p class="muted">किसी भी बस कार्ड पर क्लिक करके यात्री सूची, खाली सीटें व रद्द स्लॉट देखें।</p>
+        </div>
+        <button class="btn-secondary" id="btn-dl-all-buses-xlsx">📥 सभी 9 बसों की Excel डाउनलोड</button>
+      </div>
+      <div id="bus-cards-grid" class="bus-summary-grid"></div>
+      <div id="bus-detail-panel" class="card bus-detail-box" hidden>
+        <div class="bus-detail-hdr">
+          <div>
+            <h3 id="bd-title">बस नंबर 1</h3>
+            <p id="bd-meta" class="muted"></p>
+          </div>
+          <div class="bd-actions">
+            <input type="search" id="bd-search" class="mini-search" placeholder="इस बस में खोजें..." />
+            <button class="btn-secondary" id="bd-dl-xlsx" style="background:#15803d;">📥 यह बस Excel</button>
+            <button class="btn-secondary" id="bd-close">← सभी बसें</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>सीट नं.</th>
+                <th>Sr</th>
+                <th>यात्री का नाम</th>
+                <th>उम्र/लिंग</th>
+                <th>शहर</th>
+                <th>मोबाइल</th>
+                <th>मांडोली</th>
+                <th>संके. पारस</th>
+                <th>संके. राजेंद्र</th>
+                <th>गिरनार</th>
+                <th>भीलड़ी संघवी</th>
+                <th>भीलड़ी भूरीबाई</th>
+              </tr>
+            </thead>
+            <tbody id="bd-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: DHARAMSHALA ROOMS -->
+    <section id="tab-rooms" class="tab-panel">
+      <div class="card toolbar">
+        <div class="dharamshala-pills" id="dh-pills"></div>
+        <div class="filters-row" style="margin-top: 10px;">
+          <div class="search-box" style="flex:1;">
+            <span class="search-icon">🔑</span>
+            <input type="search" id="r-search" placeholder="कमरा नंबर (जैसे 109, A201, H3, 306) या यात्री का नाम खोजें..." />
+          </div>
+          <select id="r-gender-filter" aria-label="कमरा लिंग फ़िल्टर">
+            <option value="">सभी कमरे (All Rooms)</option>
+            <option value="male">पुरुष कमरे (Male Rooms)</option>
+            <option value="female">स्त्री कमरे (Female Rooms)</option>
+            <option value="freed">रिक्त स्लॉट वाले कमरे (Has Vacant Slot)</option>
+          </select>
+        </div>
+        <div class="result-meta">
+          <span id="r-count-label">कमरे लोड हो रहे हैं...</span>
+        </div>
+      </div>
+      <div id="rooms-grid" class="rooms-grid"></div>
+    </section>
+
+    <!-- TAB 4: FULL ROUTE & DISTANCE -->
+    <section id="tab-route" class="tab-panel">
+      <div class="card toolbar" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;align-items:center;">
+        <div>
+          <h2>🛣️ समदड़ी से श्री गिरनारजी — संपूर्ण यात्रा मार्ग एवं दूरी</h2>
+          <p class="muted">कुल अनुमानित सड़क दूरी: <strong>~1,381 कि.मी.</strong> (आना-जाना पूर्ण यात्रा • 13–17 दिसम्बर 2026)</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <a class="btn-secondary" style="text-decoration:none;" href="https://www.google.com/maps/dir/Samdari,+Rajasthan/Mandoli+Jain+Tirth,+Rajasthan/Bhinmal,+Rajasthan/Varman,+Rajasthan/Deesa,+Gujarat/Shankheshwar,+Gujarat/Taranga+Jain+Temple,+Gujarat/Chotila,+Gujarat/Girnar+Taleti,+Junagadh,+Gujarat/Bhiladi,+Gujarat/Samdari,+Rajasthan" target="_blank" rel="noopener">🗺️ Google Maps पर पूरा रूट देखें</a>
+        </div>
+      </div>
+      <div id="route-timeline" class="route-timeline"></div>
+      <div class="notice-banner card">
+        <strong>ℹ️ नोट:</strong> दर्शाई गई दूरी (कि.मी.) मुख्य राजमार्ग/सड़क मार्ग के अनुसार अनुमानित है; बसों के स्थानीय पड़ाव एवं बाईपास के अनुसार वास्तविक दूरी में थोड़ा अंतर हो सकता है।
+      </div>
+    </section>
+
+    <!-- TAB 5: TIRTH CONTACTS -->
+    <section id="tab-contacts" class="tab-panel">
+      <div class="card toolbar">
+        <div class="section-header" style="margin-bottom:10px;">
+          <h2>📞 विभिन्न तीर्थ स्थलों पर व्यवस्था एवं संपर्क सूत्र</h2>
+          <p class="muted">यात्रा के दौरान भोजन, आवास, पानी, दूध, टेंट, सब्जी एवं गैस व्यवस्था हेतु सीधा संपर्क करें।</p>
+        </div>
+        <div class="filters-row">
+          <div class="search-box" style="flex:1;">
+            <span class="search-icon">🔍</span>
+            <input type="search" id="c-search" placeholder="तीर्थ स्थान, नाम, सेवा (दूध, टेंट, पानी, सब्जी, गैस, मैनेजर) या नंबर खोजें..." />
+          </div>
+          <div class="service-chips" id="service-chips">
+            <button class="chip active" data-service="">सभी</button>
+            <button class="chip" data-service="मैनेजर">मैनेजर</button>
+            <button class="chip" data-service="पानी">💧 पानी</button>
+            <button class="chip" data-service="दूध">🥛 दूध</button>
+            <button class="chip" data-service="टेंट">⛺ टेंट</button>
+            <button class="chip" data-service="सब्जी">🥬 सब्जी</button>
+            <button class="chip" data-service="गैस|सिलेंडर">🔥 गैस/सिलेंडर</button>
+          </div>
+        </div>
+      </div>
+      <div id="contacts-grid" class="contacts-grid"></div>
+      <div class="notice-banner card">
+        <strong>ℹ️ महत्वपूर्ण सूचना:</strong> यह सूची यात्रा संघ की व्यवस्थाओं को सुचारू रूप से संचालित करने के लिए तैयार की गई है। सभी व्यवस्था प्रभारी आवश्यकता पड़ने पर संबंधित संपर्क व्यक्तियों से सीधे संपर्क कर सकते हैं। जिन सेवाओं का संपर्क नंबर उपलब्ध नहीं है, उनके लिए संबंधित धर्मशाला मैनेजर से संपर्क करें।
+      </div>
+    </section>
+
+    <!-- TAB 6: COMMITTEES -->
+    <section id="tab-committees" class="tab-panel">
+      <div class="section-header" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;align-items:center;">
+        <div>
+          <h2>👥 श्री समदड़ी जैन मित्र मंडल — व्यवस्था समितियां</h2>
+          <p class="muted">सदस्य को सीधे कॉल करें या "सूची में देखें" दबाएं। Admin PIN (8049) से नाम व मोबाइल संपादित करें।</p>
+        </div>
+        <div id="comm-admin-actions" hidden style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn-admin-primary" id="btn-add-samiti-member">➕ समिति सदस्य जोड़ें</button>
+          <button class="btn-admin-light" id="btn-add-samiti-group">➕ नई समिति जोड़ें</button>
+        </div>
+      </div>
+      <div id="committees-grid" class="committees-grid"></div>
+    </section>
+
+    <!-- TAB 7: BUS MANAGEMENT TEAM -->
+    <section id="tab-busteam" class="tab-panel">
+      <div class="section-header" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;align-items:center;">
+        <div>
+          <h2>🛡️ बस प्रबंधन टीम (Bus 1 – Bus 9 Management Team)</h2>
+          <p class="muted">प्रत्येक बस के प्रभारी, सह-प्रभारी व कार्यकर्ताओं का विवरण (Admin PIN से अपडेट करें)।</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn-admin-primary" id="btn-add-busteam-global" hidden>➕ बस टीम सदस्य जोड़ें</button>
+          <button class="btn-secondary" id="btn-dl-busteam-xlsx" style="background:#15803d;">📥 बस टीम Excel</button>
+        </div>
+      </div>
+      <div id="busteam-grid" class="committees-grid"></div>
+    </section>
+
+    <!-- TAB 7: CITIES, VACANT SLOTS & CANCELLED -->
+    <section id="tab-cities" class="tab-panel">
+      <div class="dual-tabs">
+        <button class="sub-tab active" data-sub="city-list">🏙️ शहरवार सारांश (<span id="city-cnt">37</span> शहर)</button>
+        <button class="sub-tab" data-sub="vacant-list">💺 रिक्त सीट व कमरा स्लॉट (<span id="vacant-sub-cnt">0</span>)</button>
+        <button class="sub-tab" data-sub="cancelled-list">❌ रद्द यात्री सूची (<span id="canc-cnt">18</span>)</button>
+      </div>
+
+      <div id="sub-city-list" class="sub-panel active">
+        <div class="card table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Sr</th>
+                <th>शहर (City)</th>
+                <th>परिवार (Households)</th>
+                <th>कुल यात्री (Members)</th>
+                <th>पुरुष / स्त्री</th>
+                <th>प्रतिशत (%)</th>
+                <th>कार्रवाई</th>
+              </tr>
+            </thead>
+            <tbody id="city-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="sub-vacant-list" class="sub-panel" hidden>
+        <div class="card">
+          <div class="notice-banner" style="margin-top:0;margin-bottom:12px;">
+            <strong>💺 अंतिम समय आने वाले यात्रियों (Last-Arrival Members) के लिए उपलब्ध सीटें व कमरे:</strong> जब किसी यात्री का नाम रद्द किया जाता है, तो उसकी बस सीट और सभी धर्मशालाओं के कमरा नंबर यहाँ उपलब्ध स्लॉट के रूप में सुरक्षित रहते हैं।
+          </div>
+          <div id="vacant-slots-grid" class="rooms-grid"></div>
+        </div>
+      </div>
+
+      <div id="sub-cancelled-list" class="sub-panel" hidden>
+        <div class="card">
+          <div class="notice-banner warn" style="margin-top:0;margin-bottom:12px;">
+            <strong>नोट:</strong> ये यात्री वर्तमान सक्रिय सूची में नहीं हैं। यदि किसी यात्री को साइट से रद्द किया गया है, तो उनका पुराना बस व कमरा विवरण भी यहाँ संदर्भ हेतु दिखता है।
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Sr</th>
+                  <th>यात्री का नाम</th>
+                  <th>उम्र / लिंग</th>
+                  <th>शहर</th>
+                  <th>मोबाइल</th>
+                  <th>मुखिया</th>
+                  <th>रद्द बस/सीट व कारण</th>
+                </tr>
+              </thead>
+              <tbody id="cancelled-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Passenger / Family Detail Modal -->
+  <div id="detail-modal" class="modal" hidden aria-modal="true" role="dialog">
+    <div class="modal-backdrop" data-close="detail-modal"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h3 id="m-name">यात्री विवरण</h3>
+          <p id="m-sub" class="muted"></p>
+        </div>
+        <button class="modal-close" data-close="detail-modal" aria-label="बंद करें">✕</button>
+      </div>
+      <div class="modal-body" id="m-body"></div>
+    </div>
+  </div>
+
+  <!-- Admin PIN Modal -->
+  <div id="pin-modal" class="modal" hidden aria-modal="true" role="dialog">
+    <div class="modal-backdrop" data-close="pin-modal"></div>
+    <div class="modal-content" style="max-width:400px;">
+      <div class="modal-header">
+        <div>
+          <h3>🔐 समिति एडमिन लॉगिन</h3>
+          <p class="muted">डेटा बदलने (रद्द/नया यात्री) के लिए Admin PIN दर्ज करें</p>
+        </div>
+        <button class="modal-close" data-close="pin-modal">✕</button>
+      </div>
+      <form id="pin-form" class="form-stack">
+        <label class="form-lbl">Admin PIN दर्ज करें</label>
+        <input type="password" id="pin-input" inputmode="numeric" maxlength="10" placeholder="PIN लिखें..." required autofocus />
+        <p id="pin-error" class="form-error" hidden>गलत PIN! कृपया सही Admin PIN दर्ज करें।</p>
+        <button type="submit" class="btn-admin-primary" style="width:100%;padding:10px;">🔓 अनलॉक करें</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add / Edit Passenger Modal -->
+  <div id="edit-modal" class="modal" hidden aria-modal="true" role="dialog">
+    <div class="modal-backdrop" data-close="edit-modal"></div>
+    <div class="modal-content" style="max-width:680px;">
+      <div class="modal-header">
+        <div>
+          <h3 id="em-title">➕ नया / अंतिम यात्री जोड़ें</h3>
+          <p id="em-sub" class="muted">खाली या रद्द की गई सीट व कमरे सीधे यहाँ से आवंटित करें</p>
+        </div>
+        <button class="modal-close" data-close="edit-modal">✕</button>
+      </div>
+      <form id="edit-form" class="form-stack">
+        <input type="hidden" id="ef-id" />
+        <div id="ef-slot-picker-wrap" class="slot-picker-box">
+          <label class="form-lbl">💺 उपलब्ध / रद्द सीट व कमरा स्लॉट चुनें (वैकल्पिक — स्वचालित भरने हेतु):</label>
+          <select id="ef-slot-select">
+            <option value="">-- मैन्युअल चुनें या नीचे उपलब्ध स्लॉट चुनें --</option>
+          </select>
+          <p id="ef-slot-warn" class="slot-warn" hidden></p>
+        </div>
+
+        <div class="form-grid-2">
+          <div>
+            <label class="form-lbl">यात्री का पूरा नाम *</label>
+            <input type="text" id="ef-name" required placeholder="जैसे: Ramesh ji Shankarlal ji Ostwal" />
+          </div>
+          <div>
+            <label class="form-lbl">मुखिया का नाम (Head of Family)</label>
+            <input type="text" id="ef-hof" placeholder="परिवार के मुखिया का नाम" />
+          </div>
+          <div>
+            <label class="form-lbl">उम्र (Age) *</label>
+            <input type="number" id="ef-age" min="1" max="110" required />
+          </div>
+          <div>
+            <label class="form-lbl">लिंग (Gender) *</label>
+            <select id="ef-gender" required>
+              <option value="पुरुष (Male)">पुरुष (Male)</option>
+              <option value="स्त्री (Female)">स्त्री (Female)</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-lbl">शहर (City) *</label>
+            <input type="text" id="ef-city" required placeholder="जैसे: Ahmedabad" />
+          </div>
+          <div>
+            <label class="form-lbl">राज्य (State)</label>
+            <input type="text" id="ef-state" placeholder="जैसे: Gujarat" />
+          </div>
+          <div>
+            <label class="form-lbl">मोबाइल नंबर</label>
+            <input type="text" id="ef-mobile" placeholder="10 अंकों का मोबाइल नं." />
+          </div>
+          <div class="form-grid-2" style="gap:6px;">
+            <div>
+              <label class="form-lbl">बस नं. *</label>
+              <select id="ef-bus" required>
+                <option value="1">Bus 1</option><option value="2">Bus 2</option><option value="3">Bus 3</option>
+                <option value="4">Bus 4</option><option value="5">Bus 5</option><option value="6">Bus 6</option>
+                <option value="7">Bus 7</option><option value="8">Bus 8</option><option value="9">Bus 9</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-lbl">सीट नं. *</label>
+              <input type="number" id="ef-seat" min="1" max="60" required />
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="form-lbl" style="margin-top:4px;">🏨 धर्मशाला कमरा नंबर (खाली के लिए `-` लिखें)</label>
+          <div class="form-grid-3">
+            <div><small>मांडोली (13/12)</small><input type="text" id="ef-r0" value="-" /></div>
+            <div><small>संकेश्वर पारस (14/12)</small><input type="text" id="ef-r1" value="-" /></div>
+            <div><small>संकेश्वर राजेंद्र (14/12)</small><input type="text" id="ef-r2" value="-" /></div>
+            <div><small>गिरनार दर्शन (15-16)</small><input type="text" id="ef-r3" value="-" /></div>
+            <div><small>भीलड़ी संघवी (17/12)</small><input type="text" id="ef-r4" value="-" /></div>
+            <div><small>भीलड़ी भूरीबाई (17/12)</small><input type="text" id="ef-r5" value="-" /></div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;">
+          <button type="button" class="btn-secondary" data-close="edit-modal" style="background:#6b7280;">रद्द करें</button>
+          <button type="submit" class="btn-admin-primary" style="padding:10px 18px;">💾 सहेजें (Save)</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- GitHub Sync Settings Modal -->
+  <div id="gh-modal" class="modal" hidden aria-modal="true" role="dialog">
+    <div class="modal-backdrop" data-close="gh-modal"></div>
+    <div class="modal-content" style="max-width:520px;">
+      <div class="modal-header">
+        <div>
+          <h3>☁️ GitHub लाइव सिंक सेटिंग्स</h3>
+          <p class="muted">सीधे आपके GitHub रिपॉजिटरी में बदलाव लाइव सेव करने हेतु</p>
+        </div>
+        <button class="modal-close" data-close="gh-modal">✕</button>
+      </div>
+      <form id="gh-form" class="form-stack">
+        <div class="notice-banner" style="margin-top:0;">
+          यह सेटिंग केवल आपके अपने डिवाइस (Browser) में सुरक्षित रहती है। GitHub.com → Settings → Developer settings → Personal access tokens (Fine-grained) से अपने इस रिपॉजिटरी के लिए <strong>Contents: Read & Write</strong> टोकन बनाकर यहाँ पेस्ट करें।
+        </div>
+        <div class="form-grid-2">
+          <div>
+            <label class="form-lbl">GitHub Username / Owner *</label>
+            <input type="text" id="gh-owner" required placeholder="जैसे: samdari-mandal" />
+          </div>
+          <div>
+            <label class="form-lbl">Repository Name *</label>
+            <input type="text" id="gh-repo" required placeholder="जैसे: girnar-yatra-2026" />
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div>
+            <label class="form-lbl">Branch *</label>
+            <input type="text" id="gh-branch" value="main" required />
+          </div>
+          <div>
+            <label class="form-lbl">Data File Path *</label>
+            <input type="text" id="gh-path" value="data/yatra-data.json" required />
+          </div>
+        </div>
+        <div>
+          <label class="form-lbl">GitHub Personal Access Token (PAT) *</label>
+          <input type="password" id="gh-token" required placeholder="github_pat_... या ghp_..." />
+        </div>
+        <p id="gh-msg" class="muted"></p>
+        <div style="display:flex;gap:8px;justify-content:flex-end;">
+          <button type="submit" class="btn-admin-publish" style="padding:10px 18px;">💾 सेटिंग्स सहेजें</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Samiti Add/Edit Member Modal -->
+  <div id="samiti-modal" class="modal" hidden aria-modal="true" role="dialog">
+    <div class="modal-backdrop" data-close="samiti-modal"></div>
+    <div class="modal-content" style="max-width:480px;">
+      <div class="modal-header">
+        <div>
+          <h3 id="sm-title">➕ समिति सदस्य जोड़ें / बदलें</h3>
+          <p class="muted">समिति का नाम, सदस्य व मोबाइल नंबर अपडेट करें</p>
+        </div>
+        <button class="modal-close" data-close="samiti-modal">✕</button>
+      </div>
+      <form id="samiti-form" class="form-stack">
+        <input type="hidden" id="sf-comm-idx" />
+        <input type="hidden" id="sf-mem-idx" />
+        <div>
+          <label class="form-lbl">समिति चुनें *</label>
+          <select id="sf-comm-select" required></select>
+        </div>
+        <div>
+          <label class="form-lbl">सदस्य का नाम *</label>
+          <input type="text" id="sf-name" required placeholder="जैसे: शा. शांतिलालजी पालरेचा" />
+        </div>
+        <div class="form-grid-2">
+          <div>
+            <label class="form-lbl">शहर</label>
+            <input type="text" id="sf-city" placeholder="जैसे: अहमदाबाद" />
+          </div>
+          <div>
+            <label class="form-lbl">मोबाइल नंबर</label>
+            <input type="text" id="sf-mobile" placeholder="10 अंकों का मोबाइल नं." />
+          </div>
+        </div>
+        <div>
+          <label class="form-lbl">यात्री सूची खोज शब्द (English Name for Quick Search)</label>
+          <input type="text" id="sf-search" placeholder="जैसे: Shantilal ji" />
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;">
+          <button type="button" class="btn-secondary" data-close="samiti-modal" style="background:#6b7280;">रद्द करें</button>
+          <button type="submit" class="btn-admin-primary" style="padding:10px 18px;">💾 सहेजें</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Bus Team Add/Edit Member Modal -->
+  <div id="busteam-modal" class="modal" hidden aria-modal="true" role="dialog">
+    <div class="modal-backdrop" data-close="busteam-modal"></div>
+    <div class="modal-content" style="max-width:480px;">
+      <div class="modal-header">
+        <div>
+          <h3 id="bm-title">🛡️ बस प्रबंधन टीम सदस्य जोड़ें / बदलें</h3>
+          <p class="muted">बस प्रभारी / कार्यकर्ता की जानकारी दर्ज करें</p>
+        </div>
+        <button class="modal-close" data-close="busteam-modal">✕</button>
+      </div>
+      <form id="busteam-form" class="form-stack">
+        <input type="hidden" id="bf-orig-bus" />
+        <input type="hidden" id="bf-mem-idx" />
+        <div class="form-grid-2">
+          <div>
+            <label class="form-lbl">बस नंबर *</label>
+            <select id="bf-bus" required>
+              <option value="1">Bus 1</option><option value="2">Bus 2</option><option value="3">Bus 3</option>
+              <option value="4">Bus 4</option><option value="5">Bus 5</option><option value="6">Bus 6</option>
+              <option value="7">Bus 7</option><option value="8">Bus 8</option><option value="9">Bus 9</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-lbl">पद / ज़िम्मेदारी (Role)</label>
+            <input type="text" id="bf-role" placeholder="जैसे: बस प्रमुख / सह-प्रमुख" />
+          </div>
+        </div>
+        <div>
+          <label class="form-lbl">सदस्य का नाम *</label>
+          <input type="text" id="bf-name" required placeholder="पूरा नाम दर्ज करें" />
+        </div>
+        <div class="form-grid-2">
+          <div>
+            <label class="form-lbl">शहर</label>
+            <input type="text" id="bf-city" placeholder="जैसे: अहमदाबाद" />
+          </div>
+          <div>
+            <label class="form-lbl">मोबाइल नंबर</label>
+            <input type="text" id="bf-mobile" placeholder="10 अंकों का मोबाइल नं." />
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;">
+          <button type="button" class="btn-secondary" data-close="busteam-modal" style="background:#6b7280;">रद्द करें</button>
+          <button type="submit" class="btn-admin-primary" style="padding:10px 18px;">💾 सहेजें</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Excel Export Center Modal -->
+  <div id="export-modal" class="modal" hidden aria-modal="true" role="dialog">
+    <div class="modal-backdrop" data-close="export-modal"></div>
+    <div class="modal-content" style="max-width:560px;">
+      <div class="modal-header">
+        <div>
+          <h3>📥 Excel / डेटा डाउनलोड केंद्र</h3>
+          <p class="muted">किसी भी विभाग की ताज़ा (Live) Excel फ़ाइल डाउनलोड करें</p>
+        </div>
+        <button class="modal-close" data-close="export-modal">✕</button>
+      </div>
+      <div class="export-grid">
+        <button class="export-card-btn" data-export="master">
+          <strong>📊 Google_Form_Census_All_Grouped_City_Wise with Bus and Room No.xlsx</strong>
+          <span>मूल फ़ाइल के समान सटीक 3 शीट्स (All_Members_Grouped 20 कॉलम + परिवार गैप, cancelled _Members, City_Summary)</span>
+        </button>
+        <button class="export-card-btn" data-export="buses">
+          <strong>🚌 बस-वार सभी 9 बसें (.xlsx)</strong>
+          <span>सारांश + Bus 1 से Bus 9 अलग-अलग शीट्स</span>
+        </button>
+        <button class="export-card-btn" data-export="rooms">
+          <strong>🏨 धर्मशाला कमरा-वार लिस्ट (.xlsx)</strong>
+          <span>सभी 6 धर्मशालाओं के कमरों की सूची व यात्री विवरण</span>
+        </button>
+        <button class="export-card-btn" data-export="busteam">
+          <strong>🛡️ समितियां एवं बस प्रबंधन टीम (.xlsx)</strong>
+          <span>सभी व्यवस्था समितियां (मोबाइल सहित) + Bus 1–9 प्रबंधन टीम</span>
+        </button>
+        <button class="export-card-btn" data-export="cities">
+          <strong>🏙️ शहरवार सारांश, रिक्त व रद्द लिस्ट (.xlsx)</strong>
+          <span>37 शहर + रिक्त/रद्द सीटें + रद्द यात्री</span>
+        </button>
+        <button class="export-card-btn" data-export="route">
+          <strong>🛣️ यात्रा मार्ग, दूरी व तीर्थ संपर्क (.xlsx)</strong>
+          <span>पूर्ण रूट किलोमीटर सहित + सभी 9 तीर्थों के संपर्क सूत्र</span>
+        </button>
+        <button class="export-card-btn" data-export="json">
+          <strong>💾 लाइव डेटा बैकअप (yatra-data.json)</strong>
+          <span>GitHub में मैन्युअल अपलोड या बैकअप के लिए</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="app-footer">
+    <p>🚩 <strong>श्री समदड़ी जैन मित्र मंडल, समदड़ी</strong> — श्री गिरनारजी तीर्थ यात्रा संघ 2026</p>
+    <p class="muted" style="font-size:12px;margin-top:4px;">समिति सदस्यों के लिए ऑनलाइन, एडिटेबल एवं Excel एक्सपोर्ट पोर्टल</p>
+  </footer>
+
+  <!-- Data Script (fallback for offline/file://) + App Logic -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
